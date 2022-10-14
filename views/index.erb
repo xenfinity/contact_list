@@ -1,0 +1,34 @@
+<h1>Contact List</h1>
+
+<% if session[:username] %>
+  <% if session[:contacts].empty? %>
+    <i>You don't have any contacts!</i>
+  <% else %>
+    <ul>
+    <% session[:contacts].each do |contact| %>
+      <li>
+        <a><% contact[:name] %></a> - 
+        <% contact[:email] %> - 
+        <% contact[:phone] %>
+      </li>
+    <% end %>
+    </ul>
+  <% end %>
+  <br></br>
+  <form  method="get" action="/users/<%= session[:username] %>/contacts/add">
+    <button type="submit">Add Contact</button>
+  </form>
+  <br></br>
+  <i>Signed in as <b><%= session[:username] %></b></i>
+  <form class="inline" method="post" action="/users/signout">
+    <button type="submit">Sign Out</button>
+  </form>
+<% else %>
+  <i>Please sign up or sign in if you already have an account</i>
+  <form  method="get" action="/users/signin">
+    <button type="submit">Sign In</button>
+  </form>
+  <form class="inline" method="get" action="/users/signup">
+    <button type="submit">Sign Up</button>
+  </form>
+<% end %>
