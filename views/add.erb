@@ -1,0 +1,21 @@
+<form method="post" action="/users/<%= @username %>/contacts/add">
+  <div>
+    <label for="firstname">First Name:</label>
+    <input type="text" name="firstname" value="<%= session[:add_attempt][:firstname] || "" %>">
+  </div>
+  <div>
+    <label for="lastname">Last Name:</label>
+    <input type="text" name="lastname" value="<%= session[:add_attempt][:lastname] || "" %>">
+  </div>
+  <div>
+    <label for="email">Email:</label>
+    <input type="text" name="email" value="<%= session[:add_attempt][:email] || "" %>">
+  </div>
+  <div>
+    <label for="phone">Phone:</label>
+    <input type="text" name="phone" value="<%= session[:add_attempt][:phone] || "" %>">
+  </div>
+  <div>
+    <button type="submit">Add Contact</button>
+  </div>
+</form>

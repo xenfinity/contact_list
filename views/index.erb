@@ -5,11 +5,11 @@
     <i>You don't have any contacts!</i>
   <% else %>
     <ul>
-    <% session[:contacts].each do |contact| %>
+    <% session[:contacts].each do |id, contact| %>
       <li>
-        <a><% contact[:name] %></a> - 
-        <% contact[:email] %> - 
-        <% contact[:phone] %>
+        <%= contact[:fullname] %> - 
+        <%= contact[:email] %> - 
+        <%= contact[:phone] %>
       </li>
     <% end %>
     </ul>

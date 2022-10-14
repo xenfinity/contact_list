@@ -33,6 +33,10 @@ def data_path
   end
 end
 
+def generate_id
+  SecureRandom.uuid
+end
+
 def initialize_contact_list(username)
   File.open(File.join(data_path, "#{username}.yml"), "w") do |file| 
     file.write("{}")
@@ -43,14 +47,57 @@ def load_contacts(username)
   YAML.load_file(File.join(data_path, "#{username}.yml"))
 end
 
+def fullname(first, last)
+  "#{first} #{last}"
+end
+
+def build_contact(params)
+  firstname = params[:firstname].capitalize
+  lastname = params[:lastname].capitalize
+  email = params[:email]
+  phone = params[:phone]
+  fullname = fullname(firstname, lastname)
+
+  { firstname: firstname, lastname: lastname, 
+    fullname: fullname, email: email, phone: phone }
+end
+
+def valid_contact?(contact)
+  message = if contact.values.any? { |field| field.empty? }
+                      "Please fill out all fields"
+                    elsif !valid_email?(contact[:email])
+                      "Email address is invalid"
+                    elsif !valid_phone?(contact[:phone])
+                      "Phone number is invalid"
+                    end
+  if message
+    session[:error] = message
+    return false
+  else
+    true
+  end
+end
+
+def valid_email?(email)
+  email.match?(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/)
+end
+
+def valid_phone?(phone)
+  phone.size == 10 && phone.to_i != 0
+end
+
 get '/' do
   erb :index, layout: :layout
 end
 
 get '/users/:username/contacts' do
   @username = params[:username]
-  redirect '/' unless username
-  erb :index, layout: :layout
+
+  if @username
+    session[:contacts] = load_contacts(@username)
+    erb :index, layout: :layout
+  end
+  redirect '/' 
 end
 
 get '/users/signin' do
@@ -64,8 +111,7 @@ post '/users/signin' do
   if authenticate(username, password)
     session[:success] = "Welcome #{username}!"
     session[:username] = username
-    session[:contacts] = load_contacts(username)
-    redirect '/'
+    redirect "/users/#{username}/contacts"
   else
     session[:error] = "Invalid Credentials"
     redirect '/users/signin'
@@ -107,7 +153,20 @@ get '/users/:username/contacts/add' do
 end
 
 post '/users/:username/contacts/add' do
-  @username = params[:username]
-  
-  redirect '/users/:username/contacts'
+  username = params[:username]
+  contact = build_contact(params)
+  session[:add_attempt] = contact
+
+  contacts = load_contacts(username)
+  contacts[generate_id] = contact
+  contacts_path = File.join(data_path, "#{username}.yml")
+
+  if valid_contact?(contact)
+    File.open(contacts_path, "w") { |file| file.write(contacts.to_yaml) }
+    session[:success] = "Contact added successfully"
+    redirect "/users/#{username}/contacts"
+  else
+    redirect "/users/#{username}/contacts/add"
+  end
+
 end
