@@ -39,7 +39,7 @@ end
 
 def initialize_contact_list(username)
   File.open(File.join(data_path, "#{username}.yml"), "w") do |file| 
-    file.write("{}")
+    file.write(Hash.new.to_yaml)
   end
 end
 
@@ -162,6 +162,7 @@ post '/users/:username/contacts/add' do
   contacts_path = File.join(data_path, "#{username}.yml")
 
   if valid_contact?(contact)
+    session.delete(:add_attempt)
     File.open(contacts_path, "w") { |file| file.write(contacts.to_yaml) }
     session[:success] = "Contact added successfully"
     redirect "/users/#{username}/contacts"
